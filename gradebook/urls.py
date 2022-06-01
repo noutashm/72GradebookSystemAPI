@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 from gradebook.views import *
 
@@ -9,6 +10,7 @@ router.register('lecturer', LecturerViewSet, basename='lecturer')
 router.register('class', ClassViewSet, basename='class')
 router.register('student', StudentViewSet, basename='student')
 router.register('student_enrolment', StudentEnrolmentViewSet, basename='student_enrolment')
+router.register('user', UserViewSet, basename='user')
 
 
 urlpatterns = [
@@ -17,5 +19,6 @@ urlpatterns = [
     # path('course', CourseList.as_view(), name='courses'),
     # path('course/<int:pk>', course_details, name='course'),
     # path('course/<int:pk>', CourseDetails.as_view(), name='course'),
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('auth/', obtain_auth_token)
 ]
