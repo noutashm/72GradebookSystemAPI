@@ -1,7 +1,9 @@
+from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 from gradebook.views import *
+from gradebookSystemAPI import settings
 
 router = DefaultRouter()
 router.register('course', CourseViewSet, basename='course')
@@ -20,4 +22,4 @@ urlpatterns = [
     # path('course/<int:pk>', CourseDetails.as_view(), name='course'),
     path('', include(router.urls)),
     path('auth/', obtain_auth_token)
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
