@@ -1,49 +1,10 @@
 from django.http import HttpResponse
-from rest_framework import status, viewsets
+from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-
-from gradebook.models import *
+from gradebook.permissions import IsStudent, IsLecturer
 from gradebook.serializers import *
-
-
-def index(request):
-    return HttpResponse('Hello World')
-
-
-# class CourseViewset(viewsets.ViewSet):
-#     def list(self, request):
-#         courses = Course.objects.all()
-#         serializer = CourseSerializer(courses, many=True)
-#         return Response(serializer.data)
-#
-#     def create(self, request):
-#         serializer = CourseSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def retrieve(self, request, pk=None):
-#         queryset = Course.objects.all()
-#         article = get_object_or_404(queryset, pk=pk)
-#         serializer = CourseSerializer(article)
-#         return Response(serializer.data)
-#
-#     def update(self, request, pk=None):
-#         course = Course.objects.get(pk=pk)
-#         serializer = CourseSerializer(course, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def destroy(self, request, pk=None):
-#         course = Course.objects.get(pk=pk)
-#         course.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -66,6 +27,12 @@ class LecturerViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAdminUser]
 
+    def destroy(self, request, *args, **kwargs):
+        lecturer = self.get_object()
+        lecturer.user.delete()
+        lecturer.delete()
+        return Response(data='Lecturer Deleted Successfully!')
+
 
 class ClassViewSet(viewsets.ModelViewSet):
     queryset = Class.objects.all()
@@ -80,37 +47,41 @@ class StudentViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAdminUser]
 
+    def destroy(self, request, *args, **kwargs):
+        student = self.get_object()
+        student.user.delete()
+        student.delete()
+        return Response(data='Student Deleted Successfully!')
+
 
 class StudentEnrolmentViewSet(viewsets.ModelViewSet):
     queryset = StudentEnrolment.objects.all()
     serializer_class = StudentEnrolmentSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # maybe check if user is student or lecturer and return based on that
-        groups = self.request.user.group.all()
+        groups = self.request.user.groups.values_list('name', flat=True)
         if self.request.user.is_superuser:
-            studentEnrolments = StudentEnrolment.objects.all()
+            studentEnrolments = self.queryset.all()
             return studentEnrolments
-        elif groups.filter(name='student').exists():
-            student_queryset = self.queryset.filter(student=self.request.user)
-            return student_queryset
-        elif groups.filter(name='lecturer').exists():
-            lecturer_queryset = self.queryset.filter(class1__lecturer=self.request.user)
+        elif 'lecturer' in groups:
+            lecturer_queryset = self.queryset.filter(class1__lecturer__user=self.request.user)
             return lecturer_queryset
+        elif 'student' in groups:
+            student_queryset = self.queryset.filter(student__user=self.request.user)
+            return student_queryset
 
-    # TODO: check if lecturer is in this class or not then serializer.save()
-    def perform_update(self, serializer):
-        groups = self.request.user.group.all()
-        if self.request.user.is_superuser or groups.filter(name='lecturer').exists():
+    def perform_create(self, serializer):
+        if self.request.user.is_superuser:
             serializer.save()
             return HttpResponse(status=status.HTTP_201_CREATED)
+
+    def perform_update(self, serializer):
+        groups = self.request.user.groups.values_list('name', flat=True)
+        if self.request.user.is_superuser or 'lecturer' in groups:
+            serializer.save()
+            return HttpResponse(status=status.HTTP_202_ACCEPTED)
+        elif 'student' in groups:
+            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = [IsAdminUser]

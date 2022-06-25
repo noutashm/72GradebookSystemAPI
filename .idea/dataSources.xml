@@ -10,5 +10,12 @@
       <jdbc-url>jdbc:sqlite:D:\Bachelor of Computing Systems\Semester 3\ISCG7420 - Web Application Development\Assignment\gradebookSystemAPI\db.sqlite3</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="d7krg6bs7snl8m@ec2-44-197-128-108.compute-1.amazonaws.com" uuid="c485dd78-c3dd-4a82-8288-afdf25ec220e">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ec2-44-197-128-108.compute-1.amazonaws.com:5432/d7krg6bs7snl8m</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
