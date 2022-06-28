@@ -13,11 +13,6 @@ router.register('student_enrolment', StudentEnrolmentViewSet, basename='student_
 
 
 urlpatterns = [
-    # path('', index, name='home'),
-    # path('course', course_list, name='courses'),
-    # path('course', CourseList.as_view(), name='courses'),
-    # path('course/<int:pk>', course_details, name='course'),
-    # path('course/<int:pk>', CourseDetails.as_view(), name='course'),
     path('', include(router.urls)),
-    path('auth/', obtain_auth_token)
+    path('login/', CustomAuthToken.as_view()),
 ]

@@ -7,12 +7,12 @@ password: admin
 
 ## Other Credentials
 #### Student
-username:  <br />
-password: 
+username: zaid <br />
+password: zaid
 
 #### lecturer
-username:  <br />
-password: 
+username: jason <br />
+password: jason
 
 ## Deployment
 https://iscg7420gradebookapi.herokuapp.com/
