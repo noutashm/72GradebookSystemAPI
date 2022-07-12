@@ -1,5 +1,5 @@
 This is the backend of below repository: <br>
-https://github.com/noutashm/72GradebookSystemReactJS
+https://github.com/noutashm/72GradebookSystemReact
 
 ## Superuser Credentials
 username: admin <br />
